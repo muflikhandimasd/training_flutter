@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 const timeout = Duration(minutes: 1);
 final dio = Dio(BaseOptions(
-  baseUrl: 'http://192.168.1.65:9002/api',
+  baseUrl: '<BASE_URL>',
   receiveTimeout: timeout,
   connectTimeout: timeout,
   sendTimeout: timeout,
