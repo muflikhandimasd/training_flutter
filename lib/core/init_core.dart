@@ -3,6 +3,7 @@ import 'package:training_flutter/core/api/client.dart';
 import 'package:training_flutter/core/local/storage.dart';
 
 Future<void> initCore()async{
+
   dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
   dio.interceptors.add(InterceptorsWrapper(
     onRequest: (options, handler)async {

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:training_flutter/blocs/auth/auth_cubit.dart';
 import 'package:training_flutter/core/enum/api_status.dart';
-import 'package:training_flutter/providers/auth_provider.dart';
-
+import 'package:training_flutter/core/routes/app_path.dart';
 
 class RegisterPage extends StatelessWidget {
-  RegisterPage({Key? key});
+  RegisterPage({super.key});
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -19,7 +20,7 @@ class RegisterPage extends StatelessWidget {
         title: const Text('Register'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
@@ -60,23 +61,37 @@ class RegisterPage extends StatelessWidget {
                   labelText: 'Password',
                 ),
               ),
-              Consumer<AuthProvider>(builder: (context, authProvider, _) {
-                return ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      authProvider.register(
-                        context,
-                        name: _nameController.text,
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                      );
-                    }
-                  },
-                  child: authProvider.registerStatus.isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Register'),
-                );
-              }),
+              BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      if (state
+                          .registerStatus
+                          .isLoading) return;
+                      if (_formKey.currentState!.validate()) {
+                        context.read<AuthCubit>().register(
+                              name: _nameController.text,
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            );
+                      }
+                    },
+                    child:   state
+                            .registerStatus
+                            .isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Register'),
+                  );
+                },
+              ),
+
+              // ALREADY HAVE AN ACCOUNT
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, AppPath.login);
+                },
+                child: const Text('Sudah punya akun? Login'),
+              ),
             ],
           ),
         ),

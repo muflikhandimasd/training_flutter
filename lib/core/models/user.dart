@@ -12,6 +12,7 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+
     return User(
       id: cekJson(json, 'id') ?? 0,
       name: cekJson(json, 'name') ?? '',

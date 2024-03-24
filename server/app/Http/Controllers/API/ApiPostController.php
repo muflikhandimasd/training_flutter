@@ -18,6 +18,10 @@ class ApiPostController extends Controller
         $userId = auth()->id();
         $posts = Post::with('user')->where('user_id', $userId)->get();
 
+        foreach ($posts as $post) {
+            $post->thumbnail = url($post->thumbnail);
+        }
+
         return $this->responseSuccess('List Post', $posts);
     }
 
@@ -32,17 +36,19 @@ class ApiPostController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string',
             'content' => 'required|string',
-            'thumbnail' => 'required|url',
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
             return $this->responseError(422, $validator->errors()->first());
         }
 
+        $thumbnail = $this->uploadImage($request);
+
         $post = Post::create([
             'title' => $request->title,
             'content' => $request->content,
-            'thumbnail' => $request->thumbnail,
+            'thumbnail' => $thumbnail,
             'user_id' => auth()->id(),
         ]);
 
@@ -60,6 +66,10 @@ class ApiPostController extends Controller
 
         if (!$post) {
             return $this->responseError(404, 'Post not found');
+        }
+
+        if ($post->thumbnail) {
+            $post->thumbnail = url($post->thumbnail);
         }
 
         return $this->responseSuccess('Detail Post', $post);
@@ -80,18 +90,31 @@ class ApiPostController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string',
             'content' => 'required|string',
-            'thumbnail' => 'required|url',
+            'thumbnail' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
             return $this->responseError(422, $validator->errors()->first());
         }
 
-        $post->update([
+        $dataUpdate = [
             'title' => $request->title,
             'content' => $request->content,
-            'thumbnail' => $request->thumbnail,
-        ]);
+        ];
+
+        $thumbnail = $this->uploadImage($request);
+
+        if ($thumbnail) {
+            if ($post->thumbnail) {
+                $imagePath = public_path($post->thumbnail);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+            $dataUpdate['thumbnail'] = $thumbnail;
+        }
+
+        $post->update($dataUpdate);
 
         return $this->responseSuccess('Post updated successfully', $post);
     }
@@ -107,8 +130,30 @@ class ApiPostController extends Controller
             return $this->responseError(404, 'Post not found');
         }
 
+        if ($post->thumbnail) {
+            $imagePath = public_path($post->thumbnail);
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
         $post->delete();
 
         return $this->responseSuccess('Post deleted successfully');
+    }
+
+    private function uploadImage(Request $request)
+    {
+
+       $thumbnail= $request->file('thumbnail');
+       if ($thumbnail) {
+        $thumbnailName = time(). '.' . $thumbnail->getClientOriginalExtension();
+        $thumbnail->move(public_path('uploads'), $thumbnailName);
+        return '/uploads/' . $thumbnailName;
+       }
+
+         return null;
+
+
     }
 }
