@@ -27,7 +27,7 @@ class SplashPage extends StatelessWidget {
         
       },
       child: Scaffold(
-        backgroundColor: Color(0xFF42a5f5),
+        backgroundColor:Colors.white,
         body:  Center(
           child: Image.asset('assets/icons/logo.png'),
         ),
