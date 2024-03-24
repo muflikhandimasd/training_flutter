@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:training_flutter/blocs/auth/auth_cubit.dart';
 import 'package:training_flutter/core/enum/api_status.dart';
 import 'package:training_flutter/core/routes/app_path.dart';
+import 'package:training_flutter/gen/assets.gen.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -29,7 +30,7 @@ class SplashPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor:Colors.white,
         body:  Center(
-          child: Image.asset('assets/icons/logo.png'),
+          child: Assets.icons.logo.image(),
         ),
       ),
     );
